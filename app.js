@@ -42,66 +42,69 @@ app.route("/articles")
       })
       .catch(function(err){
           res.send(err);
-
       });
-
   })
   .delete(function(req,res){
 
-      Article.collection.drop().then(function(){
+      Article.collection.drop()
+      .then(function(){
           res.redirect("/articles");
 
+      })
+      .catch(function(err){
+        res.send(err);
       });
-
-
   });
 
+  app.route("/articles/:articleID")
+  .get(function(req, res){
+      Article.findOne({title: req.params.articleID}, function (err, result){
+        if (result) {
+            res.send(result)
+        } else {
+            res.send("No articles found with that title.")
+        };
+    });
+  })
+  .put(function(req, res){
+      Article.replaceOne(
+        {title: req.params.articleID},
+        {title: req.body.title, content: req.body.content},
+        function(err){
+          if(!err){
+              res.send("Update Complete");
+          } else {
+              res.send(err);
+          }
+        }
+      );
+  })
+  .patch(function(req,res){
+      Article.updateOne(
+        {title: req.params.articleID},
+        {$set: req.body},
+        function(err){
+          if(!err){
+          res.send("Update successful");
+          } else {
+          res.send(err);
+        }
+      }
+    );
+  })
+  .delete(function(req,res){
+      Article.deleteOne(
+        {title: req.params.articleID},
+        function(err){
+          if(!err){
+          res.send("Delete successful");
+          } else {
+          res.send(err);
 
-// app.get("/articles", function(req, res){
-//     Article.find({}, function(err, results){
-//       if (!err) {
-//         res.send(results);
-//       } else {
-//         res.send(err);
-//       }
-//     });
-// });
-//
-// app.post("/articles", function(req, res){
-//
-//     const newArticle = new Article ({
-//         title: req.body.title,
-//         content: req.body.content,
-//     });
-//
-//     newArticle.save().then(function(){
-//       res.redirect("/articles");
-//
-//     })
-// });
-//
-// app.delete("/articles", function(req,res){
-//
-//     Article.collection.drop().then(function(){
-//         res.redirect("/articles");
-//
-//     });
-//
-//
-// });
-
-
-
-
-
-
-
-
-
-
-
-
-
+        }
+      }
+    );
+  });
 
 app.listen(3000, function(){
     console.log("Server started on 3000;");
